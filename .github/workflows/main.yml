@@ -36,16 +36,15 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('./api/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: 安装依赖
-        run: npm install
-        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      - uses: actions/cache@v4
-        id: node-modules-cache
+      - name: Install dependencies #安装依赖
+        run: npm ci
+      - name: Cache node modules # 缓存安装的依赖
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
         with:
-         path: node_modules
-         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }} # 确保包含 package-lock.json
-      - name: Debug - Check modules
-        run: ls -la node_modules | grep crypto-js || echo "crypto-js not found!"
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }} # 使用 package-lock.json 内容生成唯一缓存键  
       - name: 签到
         run: npm run main
         env:
